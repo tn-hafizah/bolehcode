@@ -1,0 +1,6 @@
+{
+  "name": "BolehCode - Java & Problem Solving E-Learning",
+  "description": "Cyberpunk dark-themed Java & Problem Solving PWA e-learning application for Computer Science students: Slow-slow, Lama-lama Pro.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
