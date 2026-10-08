@@ -183,22 +183,22 @@ export const Array2DShooterGame: React.FC<GameProps> = ({ onScoreSubmit }) => {
   }, []);
 
   return (
-    <div className="rounded-2xl bg-[#090d18] border border-cyan-500/40 p-4 md:p-6 space-y-4">
-      <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-800">
+    <div className="rounded-2xl bg-white border border-slate-200 p-4 md:p-6 space-y-4 shadow-xs">
+      <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
         <div>
-          <h3 className="text-base font-bold text-rose-400 font-cyber">
+          <h3 className="text-base font-bold text-slate-900 font-cyber">
             Array 2D Shooter
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Topic 5: Blast the targeted 2D matrix coordinates &ldquo;matrix[row][col]&rdquo;
           </p>
         </div>
 
         <div className="flex items-center gap-3 text-xs font-mono-code font-bold">
-          <div className="px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-rose-300">
+          <div className="px-3 py-1 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700">
             Score: {score} XP
           </div>
-          <div className="px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-amber-400">
+          <div className="px-3 py-1 rounded-xl bg-slate-100 border border-slate-200 text-slate-800">
             Time: {timeLeft}s
           </div>
         </div>

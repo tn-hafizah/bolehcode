@@ -44,10 +44,10 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
       title: 'Learning Modules',
       subtitle: '8 Core Topics & Video Lectures',
       description: 'Follow the Java curriculum step by step. Includes Dr. Tuan & YouTube lecture videos, concept summaries, and live interactive code.',
-      icon: <BookOpen className="w-6 h-6 text-cyan-400" />,
-      color: 'from-cyan-500/20 to-blue-600/10 border-cyan-500/30 text-cyan-300',
+      icon: <BookOpen className="w-6 h-6 text-indigo-600" />,
+      color: 'border-slate-200 hover:border-indigo-300 text-indigo-700',
       badge: '8 Full Chapters',
-      badgeColor: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30',
+      badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
       statLabel: 'Your Progress',
       statValue: `${completedTopicsCount} / 8 Topics Completed`,
       ctaText: 'Open Learning Modules',
@@ -57,10 +57,10 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
       title: 'Past Year Exam Bank',
       subtitle: 'Final Exams & Lab Assessments',
       description: 'Collection of previous semester exam papers and UniSZA lab tests with direct links to official Google Drive folders.',
-      icon: <FileText className="w-6 h-6 text-amber-400" />,
-      color: 'from-amber-500/20 to-orange-600/10 border-amber-500/30 text-amber-300',
+      icon: <FileText className="w-6 h-6 text-amber-600" />,
+      color: 'border-slate-200 hover:border-amber-300 text-amber-700',
       badge: 'Google Drive Ready',
-      badgeColor: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+      badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
       statLabel: 'Format',
       statValue: 'PDF & Solution Code',
       ctaText: 'Explore Question Bank',
@@ -70,10 +70,10 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
       title: 'Interactive Quizzes & Practice',
       subtitle: 'Knowledge Check & Firestore Sync',
       description: 'Topic-by-topic reinforcement exercises. Test your understanding, get instant score calculations, and record progress directly to the database.',
-      icon: <HelpCircle className="w-6 h-6 text-purple-400" />,
-      color: 'from-purple-500/20 to-indigo-600/10 border-purple-500/30 text-purple-300',
+      icon: <HelpCircle className="w-6 h-6 text-purple-600" />,
+      color: 'border-slate-200 hover:border-purple-300 text-purple-700',
       badge: 'Auto Grading',
-      badgeColor: 'bg-purple-500/10 text-purple-300 border-purple-500/30',
+      badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
       statLabel: 'Completed Quizzes',
       statValue: `${quizScoresCount} Topics Completed`,
       ctaText: 'Start Taking Quizzes',
@@ -83,10 +83,10 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
       title: 'Leaderboard & Rankings',
       subtitle: 'Cohort Competition',
       description: 'Compare your XP points, achievement badges, and completion milestones with classmates across Faculty of Informatics & Computing.',
-      icon: <Trophy className="w-6 h-6 text-yellow-400" />,
-      color: 'from-yellow-500/20 to-amber-600/10 border-yellow-500/30 text-yellow-300',
+      icon: <Trophy className="w-6 h-6 text-yellow-600" />,
+      color: 'border-slate-200 hover:border-yellow-300 text-yellow-700',
       badge: 'Live Cohort XP',
-      badgeColor: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/30',
+      badgeColor: 'bg-yellow-50 text-yellow-800 border-yellow-200',
       statLabel: 'Total Earned',
       statValue: `${user.xp} Total XP`,
       ctaText: 'View Leaderboard',
@@ -96,10 +96,10 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
       title: 'Java Code Arcade',
       subtitle: '8 Interactive Mini-Games',
       description: 'Learn programming through gamification: Syntax Runner, Bug Smasher, Memory Code, Loop Racer, and algorithm challenges.',
-      icon: <Gamepad2 className="w-6 h-6 text-emerald-400" />,
-      color: 'from-emerald-500/20 to-teal-600/10 border-emerald-500/30 text-emerald-300',
+      icon: <Gamepad2 className="w-6 h-6 text-emerald-600" />,
+      color: 'border-slate-200 hover:border-emerald-300 text-emerald-700',
       badge: '8 Mini-Games',
-      badgeColor: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
+      badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
       statLabel: 'Arcade Mode',
       statValue: 'Logic & Syntax Mastery',
       ctaText: 'Play Java Arcade',
@@ -109,14 +109,14 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
       title: 'Admin Dashboard',
       subtitle: 'Student Progress & Analytics',
       description: 'Dedicated instructor portal to inspect registered students, calculate quiz averages, evaluate cohort mastery, and export CSV reports.',
-      icon: <ShieldCheck className="w-6 h-6 text-pink-400" />,
+      icon: <ShieldCheck className="w-6 h-6 text-pink-600" />,
       color: isAdmin 
-        ? 'from-pink-500/20 via-purple-600/10 to-rose-600/10 border-pink-500/40 text-pink-300' 
-        : 'from-slate-800/40 to-slate-900/40 border-slate-800 text-slate-400',
+        ? 'border-pink-200 hover:border-pink-300 text-pink-700' 
+        : 'border-slate-200 text-slate-500',
       badge: isAdmin ? 'Lecturer Access Active' : 'Restricted (Admin Only)',
       badgeColor: isAdmin 
-        ? 'bg-pink-500/20 text-pink-300 border-pink-500/40 font-bold' 
-        : 'bg-slate-800 text-slate-400 border-slate-700',
+        ? 'bg-pink-50 text-pink-700 border-pink-200 font-bold' 
+        : 'bg-slate-100 text-slate-500 border-slate-200',
       statLabel: 'Access Status',
       statValue: isAdmin ? 'Authorized (Admin)' : 'Admin Role Required',
       ctaText: isAdmin ? 'Open Admin Portal' : 'Restricted Portal',
@@ -133,10 +133,10 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
       {/* ======================================================== */}
       {/* 1. USER PROFILE SECTION                                   */}
       {/* ======================================================== */}
-      <section className="relative rounded-3xl bg-gradient-to-br from-[#0c182c] via-[#091222] to-[#12142d] border border-cyan-500/30 p-6 sm:p-8 shadow-xl shadow-cyan-950/40 overflow-hidden">
+      <section className="relative rounded-3xl bg-gradient-to-br from-indigo-50/70 via-white to-sky-50/60 border border-indigo-100/90 p-6 sm:p-8 shadow-md shadow-indigo-100/50 overflow-hidden">
         {/* Glow ambient background */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-60 h-60 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-60 h-60 bg-sky-500/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           {/* User Identity info */}
@@ -145,40 +145,40 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
               <img
                 src={user.avatar}
                 alt={user.name}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-cyan-400 shadow-lg shadow-cyan-500/20"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-indigo-400 shadow-md shadow-indigo-500/10"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = 'https://api.dicebear.com/7.x/bottts/svg?seed=' + user.name;
                 }}
               />
-              <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-md bg-cyan-500 text-slate-950 font-black text-[10px] font-mono-code shadow">
+              <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-md bg-indigo-600 text-white font-black text-[10px] font-mono-code shadow">
                 LV.{user.level}
               </span>
             </div>
 
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                   {user.name}
                 </h1>
                 
                 {isAdmin ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-pink-500/20 border border-pink-500/40 text-pink-300 font-bold text-xs">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-pink-100 border border-pink-200 text-pink-700 font-bold text-xs">
                     <ShieldCheck className="w-3.5 h-3.5" />
                     Lecturer / Admin
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold text-xs">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-xs">
                     <GraduationCap className="w-3.5 h-3.5" />
                     Student
                   </span>
                 )}
               </div>
 
-              <p className="text-xs sm:text-sm text-slate-400 font-mono-code">
+              <p className="text-xs sm:text-sm text-slate-500 font-mono-code">
                 {user.email || 'student@unisza.edu.my'} &bull; ID: {user.studentId || 'CS20240188'}
               </p>
 
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 {user.institution || 'UniSZA (Faculty of Informatics & Computing)'}
               </p>
             </div>
@@ -186,33 +186,33 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
 
           {/* Gamification Stats & Quick Actions */}
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-            <div className="flex items-center gap-2 sm:gap-3 bg-slate-900/80 border border-slate-800 rounded-2xl p-2.5 sm:px-4">
+            <div className="flex items-center gap-2 sm:gap-3 bg-white border border-slate-200 rounded-2xl p-2.5 sm:px-4 shadow-xs">
               <div className="text-center px-2">
-                <div className="flex items-center justify-center gap-1 text-cyan-400 font-black text-base sm:text-lg">
+                <div className="flex items-center justify-center gap-1 text-indigo-600 font-black text-base sm:text-lg">
                   <Zap className="w-4 h-4 fill-current" />
                   <span>{user.xp}</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium">Total XP</span>
+                <span className="text-[10px] text-slate-500 font-medium">Total XP</span>
               </div>
 
-              <div className="h-7 w-[1px] bg-slate-800" />
+              <div className="h-7 w-[1px] bg-slate-200" />
 
               <div className="text-center px-2">
-                <div className="flex items-center justify-center gap-1 text-orange-400 font-black text-base sm:text-lg">
+                <div className="flex items-center justify-center gap-1 text-amber-600 font-black text-base sm:text-lg">
                   <Flame className="w-4 h-4 fill-current" />
                   <span>{user.streakDays}d</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium">Streak</span>
+                <span className="text-[10px] text-slate-500 font-medium">Streak</span>
               </div>
 
-              <div className="h-7 w-[1px] bg-slate-800" />
+              <div className="h-7 w-[1px] bg-slate-200" />
 
               <div className="text-center px-2">
-                <div className="flex items-center justify-center gap-1 text-purple-400 font-black text-base sm:text-lg">
+                <div className="flex items-center justify-center gap-1 text-purple-600 font-black text-base sm:text-lg">
                   <Award className="w-4 h-4" />
                   <span>{user.badges?.length || 0}</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium">Badges</span>
+                <span className="text-[10px] text-slate-500 font-medium">Badges</span>
               </div>
             </div>
 
@@ -223,7 +223,7 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
                   sound.playClick();
                   onOpenProfileModal();
                 }}
-                className="px-3.5 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
                 title="Edit Profile & Role"
               >
                 <UserCheck className="w-3.5 h-3.5" />
@@ -235,7 +235,7 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
                   sound.playClick();
                   onLogout();
                 }}
-                className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-rose-950/50 border border-slate-800 hover:border-rose-700/50 text-slate-400 hover:text-rose-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                className="px-3 py-2 rounded-xl bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-300 text-slate-600 hover:text-rose-600 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
                 title="Sign Out"
               >
                 <LogOut className="w-3.5 h-3.5" />
@@ -246,18 +246,18 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
         </div>
 
         {/* Level Progression Progress Bar */}
-        <div className="mt-6 pt-5 border-t border-slate-800/80">
+        <div className="mt-6 pt-5 border-t border-slate-200/80">
           <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-slate-400 font-medium">
+            <span className="text-slate-600 font-medium">
               Level {user.level} Progress &bull; {user.xp % 150} / 150 XP to Level {user.level + 1}
             </span>
-            <span className="text-cyan-400 font-mono-code font-bold">
+            <span className="text-indigo-600 font-mono-code font-bold">
               {Math.min(100, Math.round(((user.xp % 150) / 150) * 100))}%
             </span>
           </div>
-          <div className="w-full h-2 rounded-full bg-slate-900 border border-slate-800 overflow-hidden">
+          <div className="w-full h-2 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-cyan-500 to-pink-500 transition-all duration-500 rounded-full"
+              className="h-full bg-gradient-to-r from-indigo-500 to-sky-500 transition-all duration-500 rounded-full"
               style={{ width: `${Math.min(100, Math.max(8, Math.round(((user.xp % 150) / 150) * 100)))}%` }}
             />
           </div>
@@ -270,13 +270,13 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
               <span>Explore Features</span>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
                 {features.length} Portals
               </span>
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400">
+            <p className="text-xs sm:text-sm text-slate-500">
               Select any feature below to start learning, practicing, or reviewing analytics.
             </p>
           </div>
@@ -289,15 +289,15 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
               <div
                 key={feat.id}
                 onClick={() => handleCardClick(feat.id)}
-                className={`group relative rounded-3xl bg-[#0a1122]/90 border p-6 flex flex-col justify-between transition-all duration-300 hover:scale-[1.015] hover:shadow-2xl hover:shadow-cyan-950/40 cursor-pointer overflow-hidden backdrop-blur-sm ${feat.color}`}
+                className="group relative rounded-3xl bg-white border border-slate-200/90 hover:border-indigo-300 p-6 flex flex-col justify-between transition-all duration-300 hover:scale-[1.015] hover:shadow-xl hover:shadow-indigo-500/10 cursor-pointer overflow-hidden backdrop-blur-sm shadow-xs"
               >
                 {/* Ambient glow in card background */}
-                <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-colors pointer-events-none" />
+                <div className="absolute -top-12 -right-12 w-32 h-32 bg-indigo-50/50 rounded-full blur-2xl group-hover:bg-indigo-100/60 transition-colors pointer-events-none" />
 
                 <div>
                   {/* Top Badge & Icon */}
                   <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center shadow-xs group-hover:scale-110 transition-transform">
                       {feat.icon}
                     </div>
 
@@ -307,26 +307,26 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
                   </div>
 
                   {/* Title & Subtitle */}
-                  <h3 className="text-lg font-black text-white group-hover:text-cyan-300 transition-colors mb-1">
+                  <h3 className="text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors mb-1">
                     {feat.title}
                   </h3>
-                  <p className="text-xs font-semibold text-cyan-400/80 mb-2.5">
+                  <p className="text-xs font-semibold text-indigo-600 mb-2.5">
                     {feat.subtitle}
                   </p>
 
                   {/* Description */}
-                  <p className="text-xs text-slate-300 leading-relaxed line-clamp-3 mb-6">
+                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-3 mb-6">
                     {feat.description}
                   </p>
                 </div>
 
                 {/* Footer with Stat & CTA Button */}
-                <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between gap-3">
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
                   <div>
                     <span className="block text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
                       {feat.statLabel}
                     </span>
-                    <span className="text-xs font-bold text-slate-200">
+                    <span className="text-xs font-bold text-slate-800">
                       {feat.statValue}
                     </span>
                   </div>
@@ -336,7 +336,7 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
                       e.stopPropagation();
                       handleCardClick(feat.id);
                     }}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900/90 group-hover:bg-cyan-500 text-slate-200 group-hover:text-slate-950 font-bold text-xs transition-all shadow-sm border border-slate-700/60 group-hover:border-cyan-400 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 group-hover:bg-indigo-600 text-slate-700 group-hover:text-white font-bold text-xs transition-all shadow-xs border border-slate-200 group-hover:border-indigo-600 cursor-pointer"
                   >
                     <span>{feat.ctaText}</span>
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -349,15 +349,15 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
       </section>
 
       {/* Quick Study Tip & Dr. Tuan Shoutout */}
-      <section className="bg-gradient-to-r from-cyan-950/40 via-[#0a1428] to-purple-950/40 border border-cyan-800/40 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <section className="bg-gradient-to-r from-indigo-50/80 via-sky-50 to-purple-50/70 border border-indigo-100 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center shrink-0 text-cyan-300">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-100 border border-indigo-200 flex items-center justify-center shrink-0 text-indigo-600">
             <Play className="w-6 h-6 fill-current" />
           </div>
           <div>
-            <h4 className="text-sm font-black text-white">Need a Quick Start?</h4>
-            <p className="text-xs text-slate-300">
-              Jump straight into Chapter 1 (Introduction & Logic Thinking) with Dr. Tuan&apos;s UniSZA lecture series.
+            <h4 className="text-sm font-black text-slate-900">Need a Quick Start?</h4>
+            <p className="text-xs text-slate-600">
+              Jump straight into Chapter 1 (Introduction &amp; Logic Thinking) with Dr. Tuan&apos;s UniSZA lecture series.
             </p>
           </div>
         </div>
@@ -367,7 +367,7 @@ export const FeaturesHubTab: React.FC<FeaturesHubTabProps> = ({
             sound.playClick();
             onSelectFeature('modules');
           }}
-          className="shrink-0 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-cyan-500/20 transition cursor-pointer"
+          className="shrink-0 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-indigo-500/20 transition cursor-pointer"
         >
           <span>Watch Chapter 1</span>
           <ChevronRight className="w-4 h-4" />

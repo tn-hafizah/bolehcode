@@ -241,23 +241,23 @@ export const GUIBuilderGame: React.FC<GameProps> = ({ onScoreSubmit }) => {
   }, []);
 
   return (
-    <div className="rounded-2xl bg-[#090d18] border border-cyan-500/40 p-4 md:p-6 space-y-4">
-      <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-800">
+    <div className="rounded-2xl bg-white border border-slate-200 p-4 md:p-6 space-y-4 shadow-xs">
+      <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
         <div>
-          <h3 className="text-base font-bold text-emerald-400 font-cyber">
+          <h3 className="text-base font-bold text-slate-900 font-cyber">
             GUI Builder
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Topic 7: Mount Java Swing components (JButton, JLabel, JTextField) inside JFrame container
           </p>
         </div>
 
-        <div className="px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-emerald-300 font-mono-code font-bold text-xs">
+        <div className="px-3 py-1 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-mono-code font-bold text-xs">
           Score: {score} XP
         </div>
       </div>
 
-      <div className="text-xs font-mono-code text-center py-1.5 px-3 rounded-lg bg-slate-950 border border-slate-800 text-cyan-300">
+      <div className="text-xs font-mono-code text-center py-1.5 px-3 rounded-lg bg-slate-50 border border-slate-200 text-indigo-700">
         {feedback}
       </div>
 

@@ -9,8 +9,8 @@
 
   body {
     font-family: var(--font-sans);
-    background-color: #060913;
-    color: #e2e8f0;
+    background-color: #f8fafc;
+    color: #0f172a;
   }
 }
 
@@ -23,68 +23,63 @@
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* Subtle Cyberpunk Grid Background */
+/* Subtle Light Grid Background */
 .bg-cyber-grid {
   background-image: 
-    linear-gradient(to right, rgba(0, 240, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+    linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
 .bg-cyber-dots {
-  background-image: radial-gradient(rgba(168, 85, 247, 0.15) 1px, transparent 0);
+  background-image: radial-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 0);
   background-size: 24px 24px;
 }
 
-/* Glow Utilities */
+/* Glow Utilities - Refined for Light Mode */
 .glow-cyan {
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.35);
+  box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.15), 0 8px 10px -6px rgba(14, 165, 233, 0.08);
 }
 
 .glow-magenta {
-  box-shadow: 0 0 20px rgba(236, 72, 153, 0.35);
+  box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.15), 0 8px 10px -6px rgba(236, 72, 153, 0.08);
 }
 
 .glow-amber {
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
+  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.15), 0 8px 10px -6px rgba(245, 158, 11, 0.08);
 }
 
 .glow-text-cyan {
-  text-shadow: 0 0 10px rgba(6, 182, 212, 0.7);
+  text-shadow: 0 0 10px rgba(14, 165, 233, 0.35);
 }
 
 .glow-text-magenta {
-  text-shadow: 0 0 10px rgba(236, 72, 153, 0.7);
+  text-shadow: 0 0 10px rgba(236, 72, 153, 0.35);
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Light Theme */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #090d1a;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #06b6d4;
+  background: #94a3b8;
 }
 
 /* Scanline Overlay for retro vibe */
 .scanlines {
   background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%, 
-    rgba(0, 0, 0, 0.25) 50%
-  ), linear-gradient(
-    90deg,
-    rgba(255, 0, 0, 0.03),
-    rgba(0, 255, 0, 0.01),
-    rgba(0, 0, 255, 0.03)
+    rgba(255, 255, 255, 0) 50%, 
+    rgba(0, 0, 0, 0.02) 50%
   );
-  background-size: 100% 4px, 6px 100%;
+  background-size: 100% 4px;
   pointer-events: none;
 }
 

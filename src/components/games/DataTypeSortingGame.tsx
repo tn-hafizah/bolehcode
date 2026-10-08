@@ -219,27 +219,27 @@ export const DataTypeSortingGame: React.FC<GameProps> = ({ onScoreSubmit }) => {
   }, [gameState]);
 
   return (
-    <div className="rounded-2xl bg-[#090d18] border border-cyan-500/40 p-4 md:p-6 space-y-4">
-      <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-800">
+    <div className="rounded-2xl bg-white border border-slate-200 p-4 md:p-6 space-y-4 shadow-xs">
+      <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
         <div>
-          <h3 className="text-base font-bold text-purple-400 font-cyber">
+          <h3 className="text-base font-bold text-slate-900 font-cyber">
             Data Type Sorting
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Topic 3: Sort falling values into the correct data type memory slot
           </p>
         </div>
 
         <div className="flex items-center gap-4 text-xs font-mono-code font-bold">
-          <div className="flex items-center gap-1 text-rose-400">
+          <div className="flex items-center gap-1 text-rose-500">
             {Array.from({ length: 3 }).map((_, i) => (
               <Heart
                 key={i}
-                className={`w-4 h-4 ${i < lives ? 'fill-current' : 'text-slate-700'}`}
+                className={`w-4 h-4 ${i < lives ? 'fill-current' : 'text-slate-300'}`}
               />
             ))}
           </div>
-          <div className="px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-cyan-300">
+          <div className="px-3 py-1 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700">
             Points: {score}
           </div>
         </div>

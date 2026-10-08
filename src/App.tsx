@@ -263,68 +263,6 @@ export default function App() {
     });
   };
 
-  // Instant login as Admin (Dr. Norhafizah)
-  const handleQuickAdmin = async () => {
-    sound.playClick();
-    const adminUser: UserProfile = {
-      ...user,
-      uid: 'admin-dr-hafizah',
-      name: 'Ts. Dr. Tuan Norhafizah Tuan Zakaria',
-      email: ADMIN_EMAIL,
-      studentId: 'STAFF-FIK-01',
-      institution: 'UniSZA (Faculty of Informatics & Computing)',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-      role: 'admin',
-      xp: Math.max(user.xp || 0, 1478),
-      level: Math.max(user.level || 0, 10),
-      streakDays: Math.max(user.streakDays || 0, 5),
-      completedTopics: user.completedTopics.length > 0 ? user.completedTopics : [1, 2, 3, 4, 5, 6, 7, 8],
-      completedVideos: user.completedVideos.length > 0 ? user.completedVideos : ['t1-dt-1', 't2-dt-1', 't3-dt-1', 't4-dt-1'],
-      badges: user.badges.length > 0 ? user.badges : ['badge-problemsolver', 'badge-modular', 'badge-master', 'badge-champion'],
-      quizScores: Object.keys(user.quizScores || {}).length > 0 ? user.quizScores : { 1: 100, 2: 95, 3: 90, 4: 100 },
-      gameHighScores: user.gameHighScores || { flowchart: 500 },
-    };
-    setUser(adminUser);
-    setIsLoggedIn(true);
-    try {
-      localStorage.setItem(AUTH_STATE_KEY, 'true');
-      await saveStudentProgress(adminUser.uid!, { ...adminUser });
-    } catch {}
-    handleSelectTab('hub');
-    sound.playWin();
-  };
-
-  // Instant login as Student
-  const handleQuickStudent = async () => {
-    sound.playClick();
-    const studentUser: UserProfile = {
-      ...user,
-      uid: 'stud-cs-001',
-      name: 'Ahmad Faiz bin Rosli',
-      email: 'faiz.rosli@student.unisza.edu.my',
-      studentId: 'CS20230101',
-      institution: 'UniSZA (Faculty of Informatics & Computing)',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-      role: 'student',
-      xp: 680,
-      level: 5,
-      streakDays: 7,
-      completedTopics: [1, 2, 3, 4, 5],
-      completedVideos: ['t1-dt-1', 't2-dt-1', 't3-dt-1'],
-      badges: ['badge-problemsolver', 'badge-modular'],
-      quizScores: { 1: 90, 2: 85, 3: 95 },
-      gameHighScores: { flowchart: 450 },
-    };
-    setUser(studentUser);
-    setIsLoggedIn(true);
-    try {
-      localStorage.setItem(AUTH_STATE_KEY, 'true');
-      await saveStudentProgress(studentUser.uid!, { ...studentUser });
-    } catch {}
-    handleSelectTab('hub');
-    sound.playWin();
-  };
-
   // Handle Logout
   const handleLogout = () => {
     sound.playClick();
@@ -348,12 +286,12 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#060913] text-slate-100 flex flex-col font-sans relative selection:bg-cyan-500/30 selection:text-cyan-200">
-      {/* Background Cyber Glow Gradients */}
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans relative selection:bg-indigo-500/20 selection:text-indigo-900">
+      {/* Background Soft Glow Gradients */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-600/5 rounded-full blur-[120px]" />
-        <div className="absolute top-1/3 right-10 w-96 h-96 bg-pink-600/5 rounded-full blur-[140px]" />
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-indigo-600/5 rounded-full blur-[140px]" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-[120px]" />
+        <div className="absolute top-1/3 right-10 w-96 h-96 bg-pink-500/5 rounded-full blur-[140px]" />
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-sky-500/5 rounded-full blur-[140px]" />
       </div>
 
       {/* Offline Toast */}
@@ -361,7 +299,7 @@ export default function App() {
 
       {/* Floating XP & Badge Toast */}
       {xpToast.visible && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-pink-500 text-slate-950 font-black text-xs md:text-sm shadow-2xl flex items-center gap-2 animate-bounce">
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-sky-600 text-white font-black text-xs md:text-sm shadow-xl flex items-center gap-2 animate-bounce">
           <Sparkles className="w-4 h-4 fill-current" />
           <span>{xpToast.message}</span>
         </div>
@@ -381,8 +319,6 @@ export default function App() {
         {!isLoggedIn ? (
           <GetStartedScreen
             onGetStarted={() => setIsAuthModalOpen(true)}
-            onQuickLoginAdmin={handleQuickAdmin}
-            onQuickLoginStudent={handleQuickStudent}
           />
         ) : (
           <>
@@ -400,21 +336,21 @@ export default function App() {
             {currentTab !== 'hub' && (
               <div className="space-y-4">
                 {/* Back to Features Hub Navigation Bar */}
-                <div className="flex items-center justify-between bg-[#0b1324]/90 border border-cyan-500/30 rounded-2xl px-4 py-2.5 backdrop-blur-md shadow-lg shadow-cyan-950/20">
+                <div className="flex items-center justify-between bg-white/95 border border-slate-200/90 rounded-2xl px-4 py-2.5 backdrop-blur-md shadow-sm">
                   <button
                     onClick={() => {
                       sound.playClick();
                       handleSelectTab('hub');
                     }}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 hover:text-cyan-200 text-xs font-semibold transition cursor-pointer"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 hover:text-indigo-800 text-xs font-semibold transition cursor-pointer"
                   >
                     <ArrowLeft className="w-4 h-4" />
                     <span>Back to Features Hub</span>
                   </button>
 
-                  <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400 font-medium">
-                    <LayoutGrid className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="text-slate-300">{getFeatureTitle(currentTab)}</span>
+                  <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 font-medium">
+                    <LayoutGrid className="w-3.5 h-3.5 text-indigo-600" />
+                    <span className="text-slate-700 font-semibold">{getFeatureTitle(currentTab)}</span>
                   </div>
                 </div>
 
@@ -460,20 +396,20 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 bg-[#04070f] py-6 px-4 text-center text-xs text-slate-400 relative z-10 hidden sm:block">
+      <footer className="border-t border-slate-200 bg-white py-6 px-4 text-center text-xs text-slate-500 relative z-10 hidden sm:block">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="font-cyber font-bold text-cyan-400 text-sm">BolehCode</span>
-            <span className="text-slate-400">—</span>
-            <span className="text-amber-300 font-medium">Slow-slow, Lama-lama Pro</span>
+            <span className="font-cyber font-bold text-indigo-600 text-sm">BolehCode</span>
+            <span className="text-slate-300">—</span>
+            <span className="text-amber-600 font-medium">&ldquo;Slow-slow, Lama-lama Pro&rdquo;</span>
           </div>
 
-          <div className="flex items-center gap-1 text-[11px] text-slate-400">
+          <div className="flex items-center gap-1 text-[11px] text-slate-500">
             <span>Specially crafted for Computer Science Java Students &bull; Reference to Dr. Tuan's Lectures</span>
             <Heart className="w-3.5 h-3.5 text-rose-500 inline fill-rose-500 mx-1" />
           </div>
 
-          <div className="text-[11px] font-mono-code text-cyan-400/80">
+          <div className="text-[11px] font-mono-code text-indigo-600">
             PWA Progressive Web App &bull; Offline Ready
           </div>
         </div>
