@@ -14,9 +14,11 @@ import {
   Code2,
   Sparkles,
   Flame,
-  ShieldCheck
+  ShieldCheck,
+  LayoutGrid
 } from 'lucide-react';
 import { sound } from '../utils/audio';
+import { ADMIN_EMAIL } from '../firebase/authService';
 
 interface NavbarProps {
   currentTab: TabType;
@@ -42,12 +44,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const navItems: { tab: TabType; label: string; icon: React.ReactNode; badge?: string }[] = [
+    { tab: 'hub', label: 'Main Menu', icon: <LayoutGrid className="w-4 h-4" /> },
     { tab: 'modules', label: 'Modules', icon: <BookOpen className="w-4 h-4" /> },
     { tab: 'pastyear', label: 'Past Year', icon: <FileText className="w-4 h-4" />, badge: 'Drive' },
-    { tab: 'quiz', label: 'Interactive Quiz', icon: <HelpCircle className="w-4 h-4" /> },
+    { tab: 'quiz', label: 'Quizzes', icon: <HelpCircle className="w-4 h-4" /> },
     { tab: 'leaderboard', label: 'Leaderboard', icon: <Trophy className="w-4 h-4" /> },
-    { tab: 'games', label: '8 Mini-Games', icon: <Gamepad2 className="w-4 h-4" />, badge: 'Hot' },
-    ...(user.role === 'admin'
+    { tab: 'games', label: '8 Games', icon: <Gamepad2 className="w-4 h-4" />, badge: 'Arcade' },
+    ...(user.role === 'admin' || user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()
       ? [{ tab: 'admin' as TabType, label: 'Admin Portal', icon: <ShieldCheck className="w-4 h-4 text-pink-400" />, badge: 'Admin' }]
       : []),
   ];
@@ -66,7 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Logo & Tagline */}
           <div className="flex items-center gap-3 shrink-0">
             <button
-              onClick={() => handleTabClick('modules')}
+              onClick={() => handleTabClick('hub')}
               className="flex items-center gap-2.5 text-left group focus:outline-none"
             >
               <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-pink-500 p-[1.5px] shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-400/40 transition">

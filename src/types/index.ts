@@ -1,4 +1,4 @@
-export type TabType = 'modules' | 'pastyear' | 'quiz' | 'leaderboard' | 'games' | 'admin';
+export type TabType = 'hub' | 'modules' | 'pastyear' | 'quiz' | 'leaderboard' | 'games' | 'admin';
 
 export interface VideoItem {
   id: string;

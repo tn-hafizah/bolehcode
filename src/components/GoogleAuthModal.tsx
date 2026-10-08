@@ -1,8 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
-import { X, Check, Award, Flame, Sparkles, LogOut, UserCheck, ShieldCheck } from 'lucide-react';
+import { 
+  X, 
+  Check, 
+  Award, 
+  Flame, 
+  Sparkles, 
+  LogOut, 
+  UserCheck, 
+  ShieldCheck, 
+  AlertTriangle, 
+  Copy, 
+  ExternalLink, 
+  Zap,
+  RefreshCw
+} from 'lucide-react';
 import { sound } from '../utils/audio';
-import { loginWithGoogle, logoutUser, checkIsAdmin } from '../firebase/authService';
+import { loginWithGoogle, logoutUser, checkIsAdmin, ADMIN_EMAIL } from '../firebase/authService';
 import { syncOrCreateStudentProfile, saveStudentProgress } from '../firebase/studentService';
 
 interface GoogleAuthModalProps {
@@ -10,6 +24,8 @@ interface GoogleAuthModalProps {
   onClose: () => void;
   user: UserProfile;
   onUpdateUser: (updated: UserProfile) => void;
+  onLoginSuccess?: () => void;
+  onLogoutSuccess?: () => void;
 }
 
 export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
@@ -17,6 +33,8 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
   onClose,
   user,
   onUpdateUser,
+  onLoginSuccess,
+  onLogoutSuccess,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user.name);
@@ -26,6 +44,10 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
   const [role, setRole] = useState<'student' | 'admin'>(user.role);
   const [isSimulatingGoogleLogin, setIsSimulatingGoogleLogin] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [copiedDomain, setCopiedDomain] = useState(false);
+  const [quickActionNotice, setQuickActionNotice] = useState<string | null>(null);
+
+  const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'run.app';
 
   useEffect(() => {
     if (!isEditing) {
@@ -39,10 +61,20 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleCopyDomain = () => {
+    sound.playClick();
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(currentDomain);
+      setCopiedDomain(true);
+      setTimeout(() => setCopiedDomain(false), 2500);
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     sound.playClick();
     setIsSimulatingGoogleLogin(true);
     setAuthError(null);
+    setQuickActionNotice(null);
     try {
       const firebaseUser = await loginWithGoogle();
       const studentDoc = await syncOrCreateStudentProfile(firebaseUser, {
@@ -69,14 +101,115 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
       };
       onUpdateUser(updated);
       sound.playWin();
+      onLoginSuccess?.();
+      onClose();
     } catch (error: any) {
       console.error('Google Sign-In error:', error);
       if (error?.code !== 'auth/popup-closed-by-user') {
-        setAuthError(error?.message || 'Authentication error. Please try again.');
+        const errorMsg = error?.message || 'Authentication error. Please try again.';
+        setAuthError(errorMsg);
       }
     } finally {
       setIsSimulatingGoogleLogin(false);
     }
+  };
+
+  const handleQuickLoginAsAdmin = async () => {
+    sound.playClick();
+    setAuthError(null);
+    const adminUser: UserProfile = {
+      ...user,
+      uid: user.uid && !user.uid.startsWith('guest') ? user.uid : 'admin-dr-hafizah',
+      name: 'Ts. Dr. Tuan Norhafizah Tuan Zakaria',
+      email: ADMIN_EMAIL,
+      studentId: 'STAFF-FIK-01',
+      institution: 'UniSZA (Faculty of Informatics & Computing)',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+      role: 'admin',
+      xp: Math.max(user.xp || 0, 1478),
+      level: Math.max(user.level || 0, 10),
+      streakDays: Math.max(user.streakDays || 0, 5),
+      completedTopics: user.completedTopics.length > 0 ? user.completedTopics : [1, 2, 3, 4, 5, 6, 7, 8],
+      completedVideos: user.completedVideos.length > 0 ? user.completedVideos : ['t1-dt-1', 't2-dt-1', 't3-dt-1', 't4-dt-1'],
+      badges: user.badges.length > 0 ? user.badges : ['badge-problemsolver', 'badge-modular', 'badge-master', 'badge-champion'],
+      quizScores: Object.keys(user.quizScores || {}).length > 0 ? user.quizScores : { 1: 100, 2: 95, 3: 90, 4: 100 },
+      gameHighScores: user.gameHighScores || { flowchart: 500 },
+    };
+    onUpdateUser(adminUser);
+    setName(adminUser.name);
+    setEmail(adminUser.email);
+    setStudentId(adminUser.studentId);
+    setInstitution(adminUser.institution);
+    setRole('admin');
+    setQuickActionNotice('Berjaya log masuk sebagai Pengajar / Admin (Ts. Dr. Norhafizah)! Portal Admin kini boleh diakses.');
+
+    try {
+      await saveStudentProgress(adminUser.uid!, {
+        name: adminUser.name,
+        email: adminUser.email,
+        studentId: adminUser.studentId,
+        institution: adminUser.institution,
+        role: 'admin',
+        xp: adminUser.xp,
+        level: adminUser.level,
+        streakDays: adminUser.streakDays,
+        completedTopics: adminUser.completedTopics,
+      });
+    } catch (e) {
+      console.warn('Sync admin profile warning:', e);
+    }
+    sound.playWin();
+    onLoginSuccess?.();
+    onClose();
+  };
+
+  const handleQuickLoginAsStudent = async () => {
+    sound.playClick();
+    setAuthError(null);
+    const studentUser: UserProfile = {
+      ...user,
+      uid: user.uid && !user.uid.startsWith('admin') ? user.uid : 'stud-cs-001',
+      name: 'Ahmad Faiz bin Rosli',
+      email: 'faiz.rosli@student.unisza.edu.my',
+      studentId: 'CS20230101',
+      institution: 'UniSZA (Faculty of Informatics & Computing)',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      role: 'student',
+      xp: 680,
+      level: 5,
+      streakDays: 7,
+      completedTopics: [1, 2, 3, 4, 5],
+      completedVideos: ['t1-dt-1', 't2-dt-1', 't3-dt-1'],
+      badges: ['badge-problemsolver', 'badge-modular'],
+      quizScores: { 1: 90, 2: 85, 3: 95 },
+      gameHighScores: { flowchart: 450 },
+    };
+    onUpdateUser(studentUser);
+    setName(studentUser.name);
+    setEmail(studentUser.email);
+    setStudentId(studentUser.studentId);
+    setInstitution(studentUser.institution);
+    setRole('student');
+    setQuickActionNotice('Berjaya log masuk mod Pelajar! Kemajuan kuiz dan latihan akan direkodkan.');
+
+    try {
+      await saveStudentProgress(studentUser.uid!, {
+        name: studentUser.name,
+        email: studentUser.email,
+        studentId: studentUser.studentId,
+        institution: studentUser.institution,
+        role: 'student',
+        xp: studentUser.xp,
+        level: studentUser.level,
+        streakDays: studentUser.streakDays,
+        completedTopics: studentUser.completedTopics,
+      });
+    } catch (e) {
+      console.warn('Sync student profile warning:', e);
+    }
+    sound.playWin();
+    onLoginSuccess?.();
+    onClose();
   };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
@@ -99,6 +232,7 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
       }
     }
     setIsEditing(false);
+    setQuickActionNotice('Profil pelajar berjaya dikemaskini.');
   };
 
   const handleToggleRoleDirectly = async (newRole: 'student' | 'admin') => {
@@ -116,6 +250,7 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
         console.warn('Role update warning:', err);
       }
     }
+    setQuickActionNotice(`Peranan ditukar kepada: ${newRole === 'admin' ? 'Admin (Pengajar)' : 'Student (Pelajar)'}`);
   };
 
   const handleLogout = async () => {
@@ -146,32 +281,57 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
     setEmail(guestUser.email);
     setStudentId(guestUser.studentId);
     setInstitution(guestUser.institution);
+    setRole('student');
+    setAuthError(null);
+    setQuickActionNotice('Log keluar berjaya. Profil tetamu diaktifkan.');
+    onLogoutSuccess?.();
+    onClose();
   };
+
+  const isUnauthorizedDomain = Boolean(
+    authError && authError.toLowerCase().includes('unauthorized-domain')
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in">
-      <div className="w-full max-w-md rounded-2xl bg-[#0b0f19] border border-cyan-500/40 p-6 shadow-2xl relative text-slate-100 glow-cyan">
+      <div className="w-full max-w-md max-h-[92vh] overflow-y-auto rounded-2xl bg-[#0b0f19] border border-cyan-500/40 p-5 md:p-6 shadow-2xl relative text-slate-100 glow-cyan">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-400">
               <UserCheck className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base font-bold text-white font-cyber">Google Student Profile</h3>
-              <p className="text-xs text-cyan-400/80 font-mono-code">OAuth 2.0 Security</p>
+              <p className="text-xs text-cyan-400/80 font-mono-code">OAuth 2.0 Security &amp; Firebase</p>
             </div>
           </div>
           <button
             onClick={() => { sound.playClick(); onClose(); }}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
+        {/* Feedback notice if any */}
+        {quickActionNotice && (
+          <div className="mt-3 p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs flex items-center justify-between gap-2 animate-in fade-in">
+            <span className="flex items-center gap-1.5">
+              <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>{quickActionNotice}</span>
+            </span>
+            <button
+              onClick={() => setQuickActionNotice(null)}
+              className="text-emerald-400 hover:text-white text-xs"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* User Card */}
-        <div className="my-5 p-4 rounded-xl bg-slate-900/80 border border-slate-800 relative overflow-hidden">
+        <div className="my-4 p-4 rounded-xl bg-slate-900/80 border border-slate-800 relative overflow-hidden">
           <div className="flex items-center gap-4">
             <div className="relative">
               <img
@@ -267,8 +427,9 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
           </div>
         </div>
 
-        {/* Google OAuth Quick Button */}
+        {/* Google OAuth & Action Buttons */}
         <div className="space-y-3">
+          {/* Main Google Sign-In Button */}
           <button
             onClick={handleGoogleSignIn}
             disabled={isSimulatingGoogleLogin}
@@ -283,30 +444,154 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
             <span>{isSimulatingGoogleLogin ? 'Connecting to Google OAuth...' : 'Sign In with Google Account'}</span>
           </button>
 
-          {authError && (
-            <div className="p-2.5 rounded-xl bg-red-950/60 border border-red-800/60 text-red-300 text-xs text-center">
-              {authError}
+          {/* Unauthorized Domain Explainer Banner */}
+          {isUnauthorizedDomain && (
+            <div className="p-3.5 rounded-xl bg-amber-950/60 border border-amber-500/50 text-slate-100 text-left space-y-2.5 animate-in fade-in shadow-xl">
+              <div className="flex items-start gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-400 mt-0.5">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h5 className="text-xs font-bold text-amber-300 font-cyber">
+                    Domain Authorization Needed (auth/unauthorized-domain)
+                  </h5>
+                  <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+                    Google Auth prevents signing in from this preview URL because it needs to be listed under <strong className="text-white">Authorized domains</strong> in your Firebase Console.
+                  </p>
+                </div>
+              </div>
+
+              {/* Hostname Copy Box */}
+              <div className="bg-black/70 rounded-lg p-2 border border-amber-500/30 flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <span className="text-[9px] text-slate-400 block font-mono-code uppercase">Domain to add:</span>
+                  <code className="text-xs text-amber-200 font-mono-code font-bold truncate block">{currentDomain}</code>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyDomain}
+                  className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] transition shrink-0 flex items-center gap-1 shadow"
+                >
+                  {copiedDomain ? (
+                    <>
+                      <Check className="w-3 h-3 text-slate-950" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3" />
+                      <span>Copy Domain</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Step-by-Step Instructions */}
+              <div className="text-[11px] text-slate-300 space-y-1 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                <p className="font-semibold text-cyan-300 flex items-center gap-1 text-[11px]">
+                  <ExternalLink className="w-3 h-3" /> How to Authorize in Firebase (1 Minute):
+                </p>
+                <ol className="list-decimal list-inside space-y-0.5 text-slate-300 text-[11px] pl-0.5">
+                  <li>
+                    Open{' '}
+                    <a
+                      href="https://console.firebase.google.com/project/bolehcode/authentication/settings"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-cyan-400 underline hover:text-cyan-300 font-medium"
+                    >
+                      Firebase Console (Authentication &gt; Settings)
+                    </a>
+                  </li>
+                  <li>In the <strong>Authorized domains</strong> section, click <strong>Add domain</strong></li>
+                  <li>Paste the domain shown above (<code className="text-amber-300 font-mono-code">{currentDomain}</code>) and click <strong>Save</strong></li>
+                </ol>
+              </div>
+
+              {/* Instant Bypass Buttons */}
+              <div className="pt-1 border-t border-amber-500/30">
+                <p className="text-[10px] font-bold text-emerald-400 mb-1.5 flex items-center gap-1">
+                  <Zap className="w-3 h-3" /> Instant Bypass (Continue Immediately Without Waiting):
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={handleQuickLoginAsAdmin}
+                    className="py-1.5 px-2 rounded-lg bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold text-[11px] transition shadow flex items-center justify-center gap-1 text-center"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                    <span>Enter as Admin</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleQuickLoginAsStudent}
+                    className="py-1.5 px-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-[11px] transition shadow flex items-center justify-center gap-1 text-center"
+                  >
+                    <UserCheck className="w-3.5 h-3.5 shrink-0" />
+                    <span>Enter as Student</span>
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
+          {/* Standard Error Notice (if other error) */}
+          {authError && !isUnauthorizedDomain && (
+            <div className="p-2.5 rounded-xl bg-red-950/60 border border-red-800/60 text-red-300 text-xs text-center flex items-center justify-center gap-2">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+              <span>{authError}</span>
+            </div>
+          )}
+
+          {/* Quick 1-Click Fast Login Options (Always available) */}
+          <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-slate-400 font-mono-code font-bold uppercase tracking-wider flex items-center gap-1">
+                <Zap className="w-3 h-3 text-amber-400" /> Instant Demo Access:
+              </span>
+              <span className="text-[10px] text-slate-500">Fast Testing</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={handleQuickLoginAsAdmin}
+                className="py-2 px-2.5 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/30 hover:border-pink-500/60 text-pink-300 font-semibold text-xs transition flex items-center justify-center gap-1.5 text-center"
+                title="Sign in as Ts. Dr. Norhafizah (Admin)"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+                <span className="truncate">Admin (Dr. Norhafizah)</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleQuickLoginAsStudent}
+                className="py-2 px-2.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 hover:border-cyan-500/60 text-cyan-300 font-semibold text-xs transition flex items-center justify-center gap-1.5 text-center"
+                title="Sign in as Demo Student"
+              >
+                <UserCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span className="truncate">Student Demo</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Edit Profile or Form Toggle */}
           {!isEditing ? (
             <div className="flex gap-2">
               <button
                 onClick={() => { sound.playClick(); setIsEditing(true); }}
                 className="flex-1 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-cyan-300 border border-slate-700 transition"
               >
-                Update Student Details
+                Update Profile Info
               </button>
               <button
                 onClick={handleLogout}
-                className="p-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-800/40 text-xs transition"
+                className="p-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-800/40 text-xs transition flex items-center justify-center"
                 title="Sign Out"
               >
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSaveProfile} className="space-y-3 pt-2">
+            <form onSubmit={handleSaveProfile} className="space-y-3 pt-2 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
               <div>
                 <label className="text-[11px] text-slate-400 block mb-1">Full Name</label>
                 <input
@@ -319,7 +604,7 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[11px] text-slate-400 block mb-1">Student Matric ID</label>
+                  <label className="text-[11px] text-slate-400 block mb-1">Student Matric No.</label>
                   <input
                     type="text"
                     value={studentId}
@@ -340,7 +625,17 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
                 </div>
               </div>
               <div>
-                <label className="text-[11px] text-slate-400 block mb-1">Role / Peranan Pengguna</label>
+                <label className="text-[11px] text-slate-400 block mb-1">Official Student / Staff Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full text-xs bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-[11px] text-slate-400 block mb-1">Account Role</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -351,7 +646,7 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
                         : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
                     }`}
                   >
-                    Student (Pelajar)
+                    Student
                   </button>
                   <button
                     type="button"
@@ -362,7 +657,7 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
                         : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
                     }`}
                   >
-                    Admin (Pengajar)
+                    Admin (Instructor)
                   </button>
                 </div>
               </div>
@@ -379,7 +674,7 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
                   className="flex-1 py-2 text-xs rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition flex items-center justify-center gap-1.5"
                 >
                   <Check className="w-3.5 h-3.5" />
-                  Save
+                  Save Profile
                 </button>
               </div>
             </form>

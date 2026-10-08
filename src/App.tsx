@@ -9,35 +9,38 @@ import { Navbar } from './components/Navbar';
 import { GoogleAuthModal } from './components/GoogleAuthModal';
 import { VideoModal } from './components/VideoModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import { GetStartedScreen } from './components/landing/GetStartedScreen';
+import { FeaturesHubTab } from './components/tabs/FeaturesHubTab';
 import { TopicModulesTab } from './components/tabs/TopicModulesTab';
 import { PastYearTab } from './components/tabs/PastYearTab';
 import { QuizTab } from './components/tabs/QuizTab';
 import { LeaderboardTab } from './components/tabs/LeaderboardTab';
 import { GamesHubTab } from './components/tabs/GamesHubTab';
 import { AdminDashboardTab } from './components/tabs/AdminDashboardTab';
-import { subscribeToAuthChanges, checkIsAdmin } from './firebase/authService';
+import { subscribeToAuthChanges, checkIsAdmin, ADMIN_EMAIL } from './firebase/authService';
 import { syncOrCreateStudentProfile, saveStudentProgress } from './firebase/studentService';
 import { sound } from './utils/audio';
-import { Sparkles, Heart } from 'lucide-react';
+import { Sparkles, Heart, ArrowLeft, LayoutGrid } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 const STORAGE_KEY = 'bolehcode_user_profile_v1';
+const AUTH_STATE_KEY = 'bolehcode_is_authenticated';
 
 const DEFAULT_USER: UserProfile = {
-  name: 'Hafizah Zakaria',
-  email: 'hafizahzakaria@unisza.edu.my',
-  studentId: 'CS20240188',
+  name: 'Ahmad Faiz bin Rosli',
+  email: 'faiz.rosli@student.unisza.edu.my',
+  studentId: 'CS20230101',
   institution: 'UniSZA (Faculty of Informatics & Computing)',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-  role: 'admin',
-  xp: 450,
-  level: 4,
-  streakDays: 5,
-  completedTopics: [1, 2],
+  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+  role: 'student',
+  xp: 680,
+  level: 5,
+  streakDays: 7,
+  completedTopics: [1, 2, 3],
   completedVideos: ['t1-dt-1', 't2-dt-1'],
   badges: ['badge-problemsolver', 'badge-modular'],
-  quizScores: {},
-  gameHighScores: {},
+  quizScores: { 1: 90, 2: 85 },
+  gameHighScores: { flowchart: 450 },
 };
 
 const getInitialTab = (): TabType => {
@@ -48,7 +51,7 @@ const getInitialTab = (): TabType => {
       return 'admin';
     }
   }
-  return 'modules';
+  return 'hub';
 };
 
 export default function App() {
@@ -58,6 +61,16 @@ export default function App() {
   const [xpToast, setXpToast] = useState<{ message: string; visible: boolean }>({
     message: '',
     visible: false,
+  });
+
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    try {
+      const savedAuth = localStorage.getItem(AUTH_STATE_KEY);
+      if (savedAuth !== null) return savedAuth === 'true';
+    } catch {
+      // ignore
+    }
+    return false; // Start on clean Get Started screen on first visit
   });
 
   const [user, setUser] = useState<UserProfile>(() => {
@@ -92,6 +105,7 @@ export default function App() {
       const hash = window.location.hash.toLowerCase();
       if (path.includes('/admin') || hash.includes('admin')) {
         setCurrentTab('admin');
+        setIsLoggedIn(true);
       }
     };
     window.addEventListener('popstate', handleLocationChange);
@@ -106,6 +120,11 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = subscribeToAuthChanges(async (fbUser) => {
       if (fbUser) {
+        setIsLoggedIn(true);
+        try {
+          localStorage.setItem(AUTH_STATE_KEY, 'true');
+        } catch {}
+
         try {
           const studentDoc = await syncOrCreateStudentProfile(fbUser);
           const isAdminUser = await checkIsAdmin(fbUser);
@@ -158,8 +177,8 @@ export default function App() {
 
       // Show toast
       const toastMsg = unlockedBadge
-        ? `+${amount} XP & New Badge Unlocked! 🏆`
-        : `+${amount} XP Earned! ⚡`;
+        ? `+${amount} XP & Lencana Baharu Dibuka! 🏆`
+        : `+${amount} XP Diperoleh! ⚡`;
       setXpToast({ message: toastMsg, visible: true });
       setTimeout(() => setXpToast((t) => ({ ...t, visible: false })), 2600);
 
@@ -244,6 +263,90 @@ export default function App() {
     });
   };
 
+  // Instant login as Admin (Dr. Norhafizah)
+  const handleQuickAdmin = async () => {
+    sound.playClick();
+    const adminUser: UserProfile = {
+      ...user,
+      uid: 'admin-dr-hafizah',
+      name: 'Ts. Dr. Tuan Norhafizah Tuan Zakaria',
+      email: ADMIN_EMAIL,
+      studentId: 'STAFF-FIK-01',
+      institution: 'UniSZA (Faculty of Informatics & Computing)',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+      role: 'admin',
+      xp: Math.max(user.xp || 0, 1478),
+      level: Math.max(user.level || 0, 10),
+      streakDays: Math.max(user.streakDays || 0, 5),
+      completedTopics: user.completedTopics.length > 0 ? user.completedTopics : [1, 2, 3, 4, 5, 6, 7, 8],
+      completedVideos: user.completedVideos.length > 0 ? user.completedVideos : ['t1-dt-1', 't2-dt-1', 't3-dt-1', 't4-dt-1'],
+      badges: user.badges.length > 0 ? user.badges : ['badge-problemsolver', 'badge-modular', 'badge-master', 'badge-champion'],
+      quizScores: Object.keys(user.quizScores || {}).length > 0 ? user.quizScores : { 1: 100, 2: 95, 3: 90, 4: 100 },
+      gameHighScores: user.gameHighScores || { flowchart: 500 },
+    };
+    setUser(adminUser);
+    setIsLoggedIn(true);
+    try {
+      localStorage.setItem(AUTH_STATE_KEY, 'true');
+      await saveStudentProgress(adminUser.uid!, { ...adminUser });
+    } catch {}
+    handleSelectTab('hub');
+    sound.playWin();
+  };
+
+  // Instant login as Student
+  const handleQuickStudent = async () => {
+    sound.playClick();
+    const studentUser: UserProfile = {
+      ...user,
+      uid: 'stud-cs-001',
+      name: 'Ahmad Faiz bin Rosli',
+      email: 'faiz.rosli@student.unisza.edu.my',
+      studentId: 'CS20230101',
+      institution: 'UniSZA (Faculty of Informatics & Computing)',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      role: 'student',
+      xp: 680,
+      level: 5,
+      streakDays: 7,
+      completedTopics: [1, 2, 3, 4, 5],
+      completedVideos: ['t1-dt-1', 't2-dt-1', 't3-dt-1'],
+      badges: ['badge-problemsolver', 'badge-modular'],
+      quizScores: { 1: 90, 2: 85, 3: 95 },
+      gameHighScores: { flowchart: 450 },
+    };
+    setUser(studentUser);
+    setIsLoggedIn(true);
+    try {
+      localStorage.setItem(AUTH_STATE_KEY, 'true');
+      await saveStudentProgress(studentUser.uid!, { ...studentUser });
+    } catch {}
+    handleSelectTab('hub');
+    sound.playWin();
+  };
+
+  // Handle Logout
+  const handleLogout = () => {
+    sound.playClick();
+    setIsLoggedIn(false);
+    try {
+      localStorage.removeItem(AUTH_STATE_KEY);
+    } catch {}
+    setCurrentTab('hub');
+  };
+
+  const getFeatureTitle = (tab: TabType) => {
+    switch (tab) {
+      case 'modules': return 'Learning Modules (8 Chapters & Videos)';
+      case 'pastyear': return 'Past Year Exam Bank (Google Drive)';
+      case 'quiz': return 'Interactive Quizzes & Exercises';
+      case 'leaderboard': return 'Student Cohort Leaderboard';
+      case 'games': return 'Java Code Arcade (8 Mini-Games)';
+      case 'admin': return 'Admin Dashboard (Lecturer Portal)';
+      default: return 'Feature Portal';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#060913] text-slate-100 flex flex-col font-sans relative selection:bg-cyan-500/30 selection:text-cyan-200">
       {/* Background Cyber Glow Gradients */}
@@ -274,39 +377,85 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 pt-4 md:pt-6 relative z-10">
-        {currentTab === 'modules' && (
-          <TopicModulesTab
-            user={user}
-            onOpenVideo={(vid) => setActiveVideo(vid)}
-            onToggleTopicComplete={handleToggleTopicComplete}
+        {/* STEP 1: GET STARTED SCREEN (if user has not logged in yet) */}
+        {!isLoggedIn ? (
+          <GetStartedScreen
+            onGetStarted={() => setIsAuthModalOpen(true)}
+            onQuickLoginAdmin={handleQuickAdmin}
+            onQuickLoginStudent={handleQuickStudent}
           />
-        )}
+        ) : (
+          <>
+            {/* STEP 3: PROFILE & LIST OF FEATURES (Central Hub) */}
+            {currentTab === 'hub' && (
+              <FeaturesHubTab
+                user={user}
+                onSelectFeature={handleSelectTab}
+                onOpenProfileModal={() => setIsAuthModalOpen(true)}
+                onLogout={handleLogout}
+              />
+            )}
 
-        {currentTab === 'pastyear' && <PastYearTab />}
+            {/* STEP 4: GO TO EACH INDIVIDUAL FEATURE ("baru pergi ke setiap features") */}
+            {currentTab !== 'hub' && (
+              <div className="space-y-4">
+                {/* Back to Features Hub Navigation Bar */}
+                <div className="flex items-center justify-between bg-[#0b1324]/90 border border-cyan-500/30 rounded-2xl px-4 py-2.5 backdrop-blur-md shadow-lg shadow-cyan-950/20">
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      handleSelectTab('hub');
+                    }}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 hover:text-cyan-200 text-xs font-semibold transition cursor-pointer"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back to Features Hub</span>
+                  </button>
 
-        {currentTab === 'quiz' && (
-          <QuizTab
-            user={user}
-            onAwardXP={handleAwardXP}
-          />
-        )}
+                  <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400 font-medium">
+                    <LayoutGrid className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="text-slate-300">{getFeatureTitle(currentTab)}</span>
+                  </div>
+                </div>
 
-        {currentTab === 'leaderboard' && <LeaderboardTab user={user} />}
+                {/* Feature Views */}
+                {currentTab === 'modules' && (
+                  <TopicModulesTab
+                    user={user}
+                    onOpenVideo={(vid) => setActiveVideo(vid)}
+                    onToggleTopicComplete={handleToggleTopicComplete}
+                  />
+                )}
 
-        {currentTab === 'games' && (
-          <GamesHubTab
-            user={user}
-            onAwardXP={handleAwardXP}
-          />
-        )}
+                {currentTab === 'pastyear' && <PastYearTab />}
 
-        {currentTab === 'admin' && (
-          <AdminDashboardTab
-            currentUser={user}
-            isAdmin={user.role === 'admin'}
-            onOpenAuth={() => setIsAuthModalOpen(true)}
-            onSelectTab={handleSelectTab}
-          />
+                {currentTab === 'quiz' && (
+                  <QuizTab
+                    user={user}
+                    onAwardXP={handleAwardXP}
+                  />
+                )}
+
+                {currentTab === 'leaderboard' && <LeaderboardTab user={user} />}
+
+                {currentTab === 'games' && (
+                  <GamesHubTab
+                    user={user}
+                    onAwardXP={handleAwardXP}
+                  />
+                )}
+
+                {currentTab === 'admin' && (
+                  <AdminDashboardTab
+                    currentUser={user}
+                    isAdmin={user.role === 'admin' || user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()}
+                    onOpenAuth={() => setIsAuthModalOpen(true)}
+                    onSelectTab={handleSelectTab}
+                  />
+                )}
+              </div>
+            )}
+          </>
         )}
       </main>
 
@@ -344,6 +493,16 @@ export default function App() {
         onClose={() => setIsAuthModalOpen(false)}
         user={user}
         onUpdateUser={setUser}
+        onLoginSuccess={() => {
+          setIsLoggedIn(true);
+          try {
+            localStorage.setItem(AUTH_STATE_KEY, 'true');
+          } catch {}
+          handleSelectTab('hub');
+        }}
+        onLogoutSuccess={() => {
+          handleLogout();
+        }}
       />
     </div>
   );
