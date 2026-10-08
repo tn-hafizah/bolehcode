@@ -13,7 +13,8 @@ import {
   X,
   Code2,
   Sparkles,
-  Flame
+  Flame,
+  ShieldCheck
 } from 'lucide-react';
 import { sound } from '../utils/audio';
 
@@ -46,6 +47,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     { tab: 'quiz', label: 'Interactive Quiz', icon: <HelpCircle className="w-4 h-4" /> },
     { tab: 'leaderboard', label: 'Leaderboard', icon: <Trophy className="w-4 h-4" /> },
     { tab: 'games', label: '8 Mini-Games', icon: <Gamepad2 className="w-4 h-4" />, badge: 'Hot' },
+    ...(user.role === 'admin'
+      ? [{ tab: 'admin' as TabType, label: 'Admin Portal', icon: <ShieldCheck className="w-4 h-4 text-pink-400" />, badge: 'Admin' }]
+      : []),
   ];
 
   const handleTabClick = (tab: TabType) => {
@@ -146,8 +150,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
 
               <div className="text-left hidden sm:block max-w-[110px] md:max-w-[130px]">
-                <div className="text-xs font-bold text-white truncate group-hover:text-cyan-300 transition">
-                  {user.name.split(' ')[0]}
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-bold text-white truncate group-hover:text-cyan-300 transition">
+                    {user.name.split(' ')[0]}
+                  </span>
+                  {user.role === 'admin' && (
+                    <span className="px-1 py-0.2 rounded bg-pink-500/20 text-pink-300 border border-pink-500/40 text-[8px] font-mono-code font-bold uppercase">
+                      Admin
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 text-[10px] text-cyan-400 font-mono-code">
                   <Sparkles className="w-3 h-3 text-cyan-400" />

@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Student or Admin user profile including progress, XP, and learning achievements",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "name": { "type": "string", "maxLength": 100, "description": "Full name of the user" },
+        "email": { "type": "string", "maxLength": 120, "description": "University or personal email" },
+        "studentId": { "type": "string", "maxLength": 50, "description": "Matric ID or Student Number" },
+        "institution": { "type": "string", "maxLength": 150, "description": "University or faculty name" },
+        "avatar": { "type": "string", "maxLength": 500, "description": "Avatar photo URL" },
+        "role": { "type": "string", "enum": ["student", "admin"], "description": "Access role" },
+        "xp": { "type": "number", "description": "Total earned XP" },
+        "level": { "type": "number", "description": "Current learning level" },
+        "streakDays": { "type": "number", "description": "Study streak in days" },
+        "completedTopics": { "type": "array", "description": "Completed topic module IDs" },
+        "completedVideos": { "type": "array", "description": "Watched video IDs" },
+        "badges": { "type": "array", "description": "Unlocked badge IDs" },
+        "quizScores": { "type": "object", "description": "Quiz scores by topic" },
+        "gameHighScores": { "type": "object", "description": "Mini-game high scores" },
+        "lastActive": { "type": "string", "maxLength": 50, "description": "Last activity ISO string" },
+        "createdAt": { "type": "string", "maxLength": 50, "description": "Account creation timestamp" },
+        "updatedAt": { "type": "string", "maxLength": 50, "description": "Last update timestamp" }
+      },
+      "required": ["uid", "name", "email", "role", "xp"]
+    },
+    "Result": {
+      "title": "Result",
+      "description": "Record of a student quiz or exercise attempt with score and statistics",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the student" },
+        "studentUid": { "type": "string", "description": "UID alias of the student" },
+        "name": { "type": "string", "maxLength": 100, "description": "Name of the student" },
+        "studentName": { "type": "string", "maxLength": 100, "description": "Name alias" },
+        "email": { "type": "string", "maxLength": 120, "description": "Email of the student" },
+        "studentEmail": { "type": "string", "maxLength": 120, "description": "Email alias" },
+        "matricId": { "type": "string", "maxLength": 50, "description": "Matric ID" },
+        "studentMatricId": { "type": "string", "maxLength": 50, "description": "Matric ID alias" },
+        "topicId": { "type": "string", "maxLength": 50, "description": "Topic ID or 'all'" },
+        "score": { "type": "number", "description": "Correct answers count" },
+        "totalQuestions": { "type": "number", "description": "Total questions count" },
+        "percentage": { "type": "number", "description": "Score percentage 0-100" },
+        "moduleProgress": { "type": "number", "description": "Total completed chapters" },
+        "date": { "type": "string", "maxLength": 50, "description": "Submission ISO timestamp" },
+        "submittedAt": { "type": "string", "maxLength": 50, "description": "Submission timestamp alias" }
+      },
+      "required": ["studentUid", "studentName", "score", "totalQuestions", "percentage"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Admin privileges tracking document",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 120, "description": "Admin email address" },
+        "role": { "type": "string", "enum": ["admin"], "description": "Admin role" },
+        "assignedAt": { "type": "string", "maxLength": 50, "description": "Assignment timestamp" }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles (students and admins), progress, and learning achievements"
+    },
+    "/results/{resultId}": {
+      "schema": { "$ref": "#/entities/Result" },
+      "description": "Recorded quiz results, scores, date, and module progress"
+    },
+    "/students/{studentUid}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Legacy compatibility student profiles"
+    },
+    "/quiz_submissions/{submissionId}": {
+      "schema": { "$ref": "#/entities/Result" },
+      "description": "Legacy compatibility quiz submissions"
+    },
+    "/admins/{adminUid}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Admin list for role validation"
+    }
+  }
+}

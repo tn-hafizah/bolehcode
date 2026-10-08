@@ -1,4 +1,4 @@
-export type TabType = 'modules' | 'pastyear' | 'quiz' | 'leaderboard' | 'games';
+export type TabType = 'modules' | 'pastyear' | 'quiz' | 'leaderboard' | 'games' | 'admin';
 
 export interface VideoItem {
   id: string;
@@ -41,19 +41,64 @@ export interface QuizQuestion {
 }
 
 export interface UserProfile {
+  uid?: string;
   name: string;
   email: string;
   studentId: string;
   institution: string;
   avatar: string;
+  role: 'student' | 'admin';
   xp: number;
   level: number;
   streakDays: number;
   completedTopics: number[];
   completedVideos: string[];
   badges: string[];
-  quizScores: Record<number, number>;
+  quizScores: Record<string | number, number>;
   gameHighScores: Record<string, number>;
+  lastActive?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface StudentRecord {
+  uid: string;
+  name: string;
+  email: string;
+  studentId: string;
+  institution: string;
+  avatar: string;
+  role: 'student' | 'admin';
+  xp: number;
+  level: number;
+  streakDays: number;
+  completedTopics: number[];
+  completedVideos: string[];
+  badges: string[];
+  quizScores: Record<string, number>;
+  gameHighScores: Record<string, number>;
+  lastActive: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface QuizSubmissionRecord {
+  id: string;
+  userId?: string;
+  studentUid: string;
+  name?: string;
+  studentName: string;
+  email?: string;
+  studentEmail?: string;
+  matricId?: string;
+  studentMatricId?: string;
+  topicId?: string;
+  score: number;
+  totalQuestions: number;
+  percentage: number;
+  moduleProgress?: number;
+  date?: string;
+  submittedAt: string;
 }
 
 export interface LeaderboardUser {

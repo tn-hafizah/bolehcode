@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
-import { X, Check, Award, Flame, Sparkles, LogOut, UserCheck } from 'lucide-react';
+import { X, Check, Award, Flame, Sparkles, LogOut, UserCheck, ShieldCheck } from 'lucide-react';
 import { sound } from '../utils/audio';
+import { loginWithGoogle, logoutUser, checkIsAdmin } from '../firebase/authService';
+import { syncOrCreateStudentProfile, saveStudentProgress } from '../firebase/studentService';
 
 interface GoogleAuthModalProps {
   isOpen: boolean;
@@ -21,7 +23,9 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
   const [studentId, setStudentId] = useState(user.studentId);
   const [institution, setInstitution] = useState(user.institution);
   const [email, setEmail] = useState(user.email);
+  const [role, setRole] = useState<'student' | 'admin'>(user.role);
   const [isSimulatingGoogleLogin, setIsSimulatingGoogleLogin] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isEditing) {
@@ -29,50 +33,105 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
       setStudentId(user.studentId);
       setInstitution(user.institution);
       setEmail(user.email);
+      setRole(user.role);
     }
   }, [user, isEditing]);
 
   if (!isOpen) return null;
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     sound.playClick();
     setIsSimulatingGoogleLogin(true);
-    setTimeout(() => {
-      setIsSimulatingGoogleLogin(false);
+    setAuthError(null);
+    try {
+      const firebaseUser = await loginWithGoogle();
+      const studentDoc = await syncOrCreateStudentProfile(firebaseUser, {
+        studentId,
+        institution,
+        initialXP: user.xp,
+      });
+      const isAdmin = await checkIsAdmin(firebaseUser);
       const updated: UserProfile = {
         ...user,
-        name: user.name || 'Hafizah Zakaria',
-        email: user.email || 'hafizahzakaria@unisza.edu.my',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-        studentId: user.studentId || 'CS20240501',
-        institution: user.institution || 'UniSZA (Faculty of Informatics & Computing)'
+        uid: firebaseUser.uid,
+        name: studentDoc.name || firebaseUser.displayName || 'Computer Science Student',
+        email: studentDoc.email || firebaseUser.email || '',
+        avatar: studentDoc.avatar || firebaseUser.photoURL || user.avatar,
+        studentId: studentDoc.studentId || user.studentId,
+        institution: studentDoc.institution || user.institution,
+        role: isAdmin ? 'admin' : (studentDoc.role || 'student'),
+        xp: studentDoc.xp ?? user.xp,
+        level: studentDoc.level ?? user.level,
+        streakDays: studentDoc.streakDays ?? user.streakDays,
+        completedTopics: studentDoc.completedTopics ?? user.completedTopics,
+        completedVideos: studentDoc.completedVideos ?? user.completedVideos,
+        badges: studentDoc.badges ?? user.badges,
       };
       onUpdateUser(updated);
       sound.playWin();
-    }, 700);
+    } catch (error: any) {
+      console.error('Google Sign-In error:', error);
+      if (error?.code !== 'auth/popup-closed-by-user') {
+        setAuthError(error?.message || 'Authentication error. Please try again.');
+      }
+    } finally {
+      setIsSimulatingGoogleLogin(false);
+    }
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveProfile = async (e: React.FormEvent) => {
     sound.playClick();
-    onUpdateUser({
+    e.preventDefault();
+    const updated: UserProfile = {
       ...user,
       name,
       studentId,
       institution,
-      email
-    });
+      email,
+      role,
+    };
+    onUpdateUser(updated);
+    if (user.uid) {
+      try {
+        await saveStudentProgress(user.uid, { name, studentId, institution, email, role });
+      } catch (err) {
+        console.error('Failed to sync profile changes to Firestore:', err);
+      }
+    }
     setIsEditing(false);
   };
 
-  const handleLogout = () => {
+  const handleToggleRoleDirectly = async (newRole: 'student' | 'admin') => {
     sound.playClick();
+    setRole(newRole);
+    const updated: UserProfile = {
+      ...user,
+      role: newRole,
+    };
+    onUpdateUser(updated);
+    if (user.uid) {
+      try {
+        await saveStudentProgress(user.uid, { role: newRole });
+      } catch (err) {
+        console.warn('Role update warning:', err);
+      }
+    }
+  };
+
+  const handleLogout = async () => {
+    sound.playClick();
+    try {
+      await logoutUser();
+    } catch (e) {
+      console.warn('Logout warning:', e);
+    }
     const guestUser: UserProfile = {
       name: 'Computer Science Student',
       email: 'student@unisza.edu.my',
       studentId: 'CS2024-GUEST',
       institution: 'UniSZA (Faculty of Informatics & Computing)',
       avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=BolehCodeStudent',
+      role: 'student',
       xp: 250,
       level: 1,
       streakDays: 1,
@@ -80,7 +139,7 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
       completedVideos: [],
       badges: [],
       quizScores: {},
-      gameHighScores: {}
+      gameHighScores: {},
     };
     onUpdateUser(guestUser);
     setName(guestUser.name);
@@ -131,7 +190,18 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
             </div>
 
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-bold text-white truncate">{user.name}</h4>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h4 className="text-sm font-bold text-white truncate">{user.name}</h4>
+                {user.role === 'admin' ? (
+                  <span className="px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 border border-pink-500/40 text-[9px] font-bold font-mono-code uppercase flex items-center gap-1">
+                    <ShieldCheck className="w-2.5 h-2.5" /> Admin
+                  </span>
+                ) : (
+                  <span className="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[9px] font-bold font-mono-code uppercase">
+                    Student
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-cyan-300 font-mono-code truncate">{user.email}</p>
               <div className="flex items-center gap-2 mt-1.5 text-[11px] text-slate-400">
                 <span className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">
@@ -142,8 +212,37 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
             </div>
           </div>
 
+          {/* Quick Role Switcher for Testing & Admin Access */}
+          <div className="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-xs">
+            <span className="text-[11px] text-slate-400">Account Role:</span>
+            <div className="inline-flex rounded-lg bg-slate-950 p-0.5 border border-slate-800">
+              <button
+                type="button"
+                onClick={() => handleToggleRoleDirectly('student')}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition ${
+                  user.role === 'student'
+                    ? 'bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Student
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleRoleDirectly('admin')}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition ${
+                  user.role === 'admin'
+                    ? 'bg-pink-500/20 text-pink-300 font-bold border border-pink-500/40'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Admin
+              </button>
+            </div>
+          </div>
+
           {/* Quick Stats Grid */}
-          <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-800 text-center">
+          <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800 text-center">
             <div className="p-1.5 rounded-lg bg-slate-950/60">
               <div className="flex items-center justify-center gap-1 text-cyan-400 text-xs font-bold">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -183,6 +282,12 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
             </svg>
             <span>{isSimulatingGoogleLogin ? 'Connecting to Google OAuth...' : 'Sign In with Google Account'}</span>
           </button>
+
+          {authError && (
+            <div className="p-2.5 rounded-xl bg-red-950/60 border border-red-800/60 text-red-300 text-xs text-center">
+              {authError}
+            </div>
+          )}
 
           {!isEditing ? (
             <div className="flex gap-2">
@@ -232,6 +337,33 @@ export const GoogleAuthModal: React.FC<GoogleAuthModalProps> = ({
                     className="w-full text-xs bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
                     required
                   />
+                </div>
+              </div>
+              <div>
+                <label className="text-[11px] text-slate-400 block mb-1">Role / Peranan Pengguna</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRole('student')}
+                    className={`py-2 px-3 rounded-lg text-xs font-semibold border transition ${
+                      role === 'student'
+                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400 shadow-sm'
+                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    Student (Pelajar)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole('admin')}
+                    className={`py-2 px-3 rounded-lg text-xs font-semibold border transition ${
+                      role === 'admin'
+                        ? 'bg-pink-500/20 text-pink-300 border-pink-400 shadow-sm'
+                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    Admin (Pengajar)
+                  </button>
                 </div>
               </div>
               <div className="flex gap-2 pt-1">

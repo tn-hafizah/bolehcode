@@ -14,6 +14,9 @@ import { PastYearTab } from './components/tabs/PastYearTab';
 import { QuizTab } from './components/tabs/QuizTab';
 import { LeaderboardTab } from './components/tabs/LeaderboardTab';
 import { GamesHubTab } from './components/tabs/GamesHubTab';
+import { AdminDashboardTab } from './components/tabs/AdminDashboardTab';
+import { subscribeToAuthChanges, checkIsAdmin } from './firebase/authService';
+import { syncOrCreateStudentProfile, saveStudentProgress } from './firebase/studentService';
 import { sound } from './utils/audio';
 import { Sparkles, Heart } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -24,20 +27,32 @@ const DEFAULT_USER: UserProfile = {
   name: 'Hafizah Zakaria',
   email: 'hafizahzakaria@unisza.edu.my',
   studentId: 'CS20240188',
-  institution: 'UniSZA (FKI)',
+  institution: 'UniSZA (Faculty of Informatics & Computing)',
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  role: 'admin',
   xp: 450,
   level: 4,
   streakDays: 5,
-  completedTopics: [1],
-  completedVideos: ['t1-dt-1'],
-  badges: ['badge-problemsolver'],
+  completedTopics: [1, 2],
+  completedVideos: ['t1-dt-1', 't2-dt-1'],
+  badges: ['badge-problemsolver', 'badge-modular'],
   quizScores: {},
   gameHighScores: {},
 };
 
+const getInitialTab = (): TabType => {
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    if (path.includes('/admin') || hash.includes('admin')) {
+      return 'admin';
+    }
+  }
+  return 'modules';
+};
+
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<TabType>('modules');
+  const [currentTab, setCurrentTab] = useState<TabType>(getInitialTab);
   const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [xpToast, setXpToast] = useState<{ message: string; visible: boolean }>({
@@ -54,6 +69,70 @@ export default function App() {
     }
     return DEFAULT_USER;
   });
+
+  const handleSelectTab = (tab: TabType) => {
+    setCurrentTab(tab);
+    if (typeof window !== 'undefined') {
+      try {
+        if (tab === 'admin') {
+          window.history.pushState(null, '', '/admin');
+        } else if (window.location.pathname === '/admin') {
+          window.history.pushState(null, '', '/');
+        }
+      } catch {
+        // ignore iframe history restriction
+      }
+    }
+  };
+
+  // URL route sync (/admin)
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      if (path.includes('/admin') || hash.includes('admin')) {
+        setCurrentTab('admin');
+      }
+    };
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, []);
+
+  // Firebase auth state subscription
+  useEffect(() => {
+    const unsubscribe = subscribeToAuthChanges(async (fbUser) => {
+      if (fbUser) {
+        try {
+          const studentDoc = await syncOrCreateStudentProfile(fbUser);
+          const isAdminUser = await checkIsAdmin(fbUser);
+          setUser((prev) => ({
+            ...prev,
+            uid: fbUser.uid,
+            name: studentDoc.name || fbUser.displayName || prev.name,
+            email: studentDoc.email || fbUser.email || prev.email,
+            avatar: studentDoc.avatar || fbUser.photoURL || prev.avatar,
+            studentId: studentDoc.studentId || prev.studentId,
+            institution: studentDoc.institution || prev.institution,
+            role: isAdminUser ? 'admin' : (studentDoc.role || 'student'),
+            xp: studentDoc.xp ?? prev.xp,
+            level: studentDoc.level ?? prev.level,
+            streakDays: studentDoc.streakDays ?? prev.streakDays,
+            completedTopics: studentDoc.completedTopics ?? prev.completedTopics,
+            completedVideos: studentDoc.completedVideos ?? prev.completedVideos,
+            badges: studentDoc.badges ?? prev.badges,
+          }));
+        } catch (err) {
+          console.warn('Firebase auth sync warning:', err);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Save user profile state
   useEffect(() => {
@@ -93,12 +172,26 @@ export default function App() {
         });
       }
 
-      return {
+      const updated = {
         ...prev,
         xp: newXP,
         level: newLevel,
         badges: newBadges,
       };
+
+      const uidToSave = prev.uid || `stud-${prev.studentId.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'guest'}`;
+      saveStudentProgress(uidToSave, { 
+        name: prev.name,
+        email: prev.email,
+        studentId: prev.studentId,
+        institution: prev.institution,
+        role: prev.role,
+        xp: newXP, 
+        level: newLevel, 
+        badges: newBadges 
+      });
+
+      return updated;
     });
   };
 
@@ -114,6 +207,14 @@ export default function App() {
         handleAwardXP(50);
       }
 
+      const uidToSave = prev.uid || `stud-${prev.studentId.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'guest'}`;
+      saveStudentProgress(uidToSave, { 
+        name: prev.name,
+        email: prev.email,
+        studentId: prev.studentId,
+        completedTopics: nextTopics 
+      });
+
       return {
         ...prev,
         completedTopics: nextTopics,
@@ -126,9 +227,19 @@ export default function App() {
     setUser((prev) => {
       if (prev.completedVideos.includes(videoId)) return prev;
       handleAwardXP(20);
+      const nextVideos = [...prev.completedVideos, videoId];
+
+      const uidToSave = prev.uid || `stud-${prev.studentId.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'guest'}`;
+      saveStudentProgress(uidToSave, { 
+        name: prev.name,
+        email: prev.email,
+        studentId: prev.studentId,
+        completedVideos: nextVideos 
+      });
+
       return {
         ...prev,
-        completedVideos: [...prev.completedVideos, videoId],
+        completedVideos: nextVideos,
       };
     });
   };
@@ -156,7 +267,7 @@ export default function App() {
       {/* Top Navigation Bar with Logo, Tagline & Google Sign-In */}
       <Navbar
         currentTab={currentTab}
-        onSelectTab={setCurrentTab}
+        onSelectTab={handleSelectTab}
         user={user}
         onOpenAuth={() => setIsAuthModalOpen(true)}
       />
@@ -186,6 +297,15 @@ export default function App() {
           <GamesHubTab
             user={user}
             onAwardXP={handleAwardXP}
+          />
+        )}
+
+        {currentTab === 'admin' && (
+          <AdminDashboardTab
+            currentUser={user}
+            isAdmin={user.role === 'admin'}
+            onOpenAuth={() => setIsAuthModalOpen(true)}
+            onSelectTab={handleSelectTab}
           />
         )}
       </main>

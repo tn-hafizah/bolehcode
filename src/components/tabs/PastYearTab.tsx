@@ -27,7 +27,7 @@ export const PastYearTab: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Primary Highlight Card: Google Drive Past Year Folder */}
+      {/* Primary Highlight Card: Past Year Folder */}
       <div className="relative rounded-3xl bg-gradient-to-br from-[#0c182a] via-[#091322] to-[#14122d] border-2 border-cyan-400/50 p-6 md:p-8 shadow-2xl overflow-hidden glow-cyan">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 -mb-16 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -36,15 +36,15 @@ export const PastYearTab: React.FC = () => {
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-xs font-mono-code font-bold">
               <FolderOpen className="w-4 h-4 text-cyan-400" />
-              <span>Official Google Drive Past Year Archive</span>
+              <span>Past Year Archive</span>
             </div>
 
             <h1 className="text-2xl md:text-3xl font-extrabold text-white font-cyber tracking-tight">
-              Past Examination Papers &amp; Solution Schemes
+              Past Examination Papers
             </h1>
 
             <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
-              All past exam archives including Final Exams, Mid-Term tests, and practical Java lab assessments are cataloged in our official Google Drive folder. Download PDF question sets and marking schemes to supercharge your revision.
+              All past exam archives including Final Exams, Mid-Term tests, and practical Java lab assessments are cataloged in our official Google Drive folder. Download PDF question sets to supercharge your revision.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-cyan-300/90 font-mono-code">

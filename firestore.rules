@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email == 'hafizahzakaria@unisza.edu.my' && request.auth.token.email_verified == true) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Users collection (primary for BolehCode)
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create, update: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+
+    // Results collection (primary for quiz & exercise submissions)
+    match /results/{resultId} {
+      allow get: if isValidId(resultId) && (
+        (isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.studentUid == request.auth.uid)) || isAdmin()
+      );
+      allow list: if isAdmin() || (
+        isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.studentUid == request.auth.uid)
+      );
+      allow create: if isValidId(resultId) &&
+        isSignedIn() &&
+        (request.resource.data.userId == request.auth.uid || request.resource.data.studentUid == request.auth.uid);
+      allow update, delete: if isValidId(resultId) && isAdmin();
+    }
+
+    // Legacy students collection support
+    match /students/{studentUid} {
+      allow get: if isValidId(studentUid) && (isOwner(studentUid) || isAdmin());
+      allow list: if isAdmin();
+      allow create, update: if isValidId(studentUid) && (isOwner(studentUid) || isAdmin());
+      allow delete: if isValidId(studentUid) && isAdmin();
+    }
+
+    // Legacy quiz_submissions collection support
+    match /quiz_submissions/{submissionId} {
+      allow get: if isValidId(submissionId) && (
+        (isSignedIn() && resource.data.studentUid == request.auth.uid) || isAdmin()
+      );
+      allow list: if isAdmin() || (
+        isSignedIn() && resource.data.studentUid == request.auth.uid
+      );
+      allow create: if isValidId(submissionId) &&
+        isSignedIn() &&
+        request.resource.data.studentUid == request.auth.uid;
+      allow update, delete: if isValidId(submissionId) && isAdmin();
+    }
+
+    // Admins metadata collection
+    match /admins/{adminUid} {
+      allow get: if isValidId(adminUid) && isSignedIn();
+      allow list: if isAdmin();
+      allow write: if false;
+    }
+  }
+}

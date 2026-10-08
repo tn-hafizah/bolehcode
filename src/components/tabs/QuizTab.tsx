@@ -14,13 +14,14 @@ import {
 } from 'lucide-react';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
+import { recordQuizSubmission } from '../../firebase/studentService';
 
 interface QuizTabProps {
   user: UserProfile;
   onAwardXP: (xp: number, badgeId?: string) => void;
 }
 
-export const QuizTab: React.FC<QuizTabProps> = ({ user: _user, onAwardXP }) => {
+export const QuizTab: React.FC<QuizTabProps> = ({ user, onAwardXP }) => {
   const [selectedTopicFilter, setSelectedTopicFilter] = useState<number | 'all'>('all');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null);
@@ -86,10 +87,31 @@ export const QuizTab: React.FC<QuizTabProps> = ({ user: _user, onAwardXP }) => {
       });
 
       // Check for Java Master badge
-      const accuracy = (score / filteredQuestions.length) * 100;
+      const accuracy = Math.round((score / filteredQuestions.length) * 100);
       if (accuracy >= 80) {
         onAwardXP(100, 'badge-master');
       }
+
+      // Record to Firestore for Admin Dashboard analytics (users and results collections)
+      const studentIdentifier = user.uid || `stud-${user.studentId.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'guest'}`;
+      const submissionDate = new Date().toISOString();
+      recordQuizSubmission({
+        studentUid: studentIdentifier,
+        userId: studentIdentifier,
+        studentName: user.name,
+        name: user.name,
+        studentEmail: user.email,
+        email: user.email,
+        studentMatricId: user.studentId,
+        matricId: user.studentId,
+        topicId: String(selectedTopicFilter),
+        score: score,
+        totalQuestions: filteredQuestions.length,
+        percentage: accuracy,
+        moduleProgress: user.completedTopics?.length || 0,
+        date: submissionDate,
+        submittedAt: submissionDate,
+      }).catch((err) => console.warn('Quiz submission record failed:', err));
     }
   };
 
